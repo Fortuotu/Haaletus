@@ -1,7 +1,5 @@
--- Hääletussüsteemi andmebaasi skeem
 SET NAMES utf8mb4;
 
--- Eelnevalt kantud hääletajad (11 inimest)
 CREATE TABLE IF NOT EXISTS INIMESED (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     eesnimi     VARCHAR(50)  NOT NULL,
@@ -9,7 +7,6 @@ CREATE TABLE IF NOT EXISTS INIMESED (
     UNIQUE KEY uq_inimene (eesnimi, perenimi)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Üks hääletusvoor (kestab 5 minutit, algab kõigile samal ajal)
 CREATE TABLE IF NOT EXISTS TULEMUSED (
     id               INT AUTO_INCREMENT PRIMARY KEY,
     h_alguse_aeg     DATETIME     NOT NULL,
@@ -18,7 +15,6 @@ CREATE TABLE IF NOT EXISTS TULEMUSED (
     vastu_haali      INT          NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Hääletaja viimane kehtiv otsus
 CREATE TABLE IF NOT EXISTS HAALETUS (
     id             INT AUTO_INCREMENT PRIMARY KEY,
     tulemus_id     INT          NOT NULL,
@@ -32,7 +28,6 @@ CREATE TABLE IF NOT EXISTS HAALETUS (
     CONSTRAINT fk_haaletus_inimene FOREIGN KEY (inimene_id) REFERENCES INIMESED(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Kõik muutused hääletamisel, kellaajaliselt (tõestusmaterjal)
 CREATE TABLE IF NOT EXISTS LOGI (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     aeg         DATETIME(3)  NOT NULL,

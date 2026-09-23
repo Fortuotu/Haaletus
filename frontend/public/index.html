@@ -3,24 +3,65 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hääletussüsteem</title>
+    <title>Haaletussusteem</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <main class="wrap">
-        <h1>Hääletussüsteem</h1>
-        <p class="lead">Baasseadistus. Hääletamise loogika ei ole veel teostatud.</p>
+        <header class="head">
+            <h1>Haaletussusteem</h1>
+            <span id="olek-silt" class="silt">...</span>
+        </header>
 
         <section class="card">
-            <h2>Teenuse olek</h2>
-            <p id="health" class="muted">Kontrollin…</p>
+            <div class="timer-row">
+                <div>
+                    <div class="timer" id="taimer">--:--</div>
+                    <p class="muted" id="alguse-aeg">Haaletust ei ole alustatud.</p>
+                </div>
+                <button id="alusta" class="btn btn-alusta">Alusta haaletust</button>
+            </div>
         </section>
 
         <section class="card">
-            <h2>Hääletajad</h2>
-            <ul id="inimesed" class="list">
-                <li class="muted">Laen…</li>
-            </ul>
+            <h2>Sinu haal</h2>
+            <label class="label" for="inimene">Haaletaja</label>
+            <select id="inimene" class="select"></select>
+
+            <div class="valikud">
+                <button id="poolt" class="btn btn-poolt" data-otsus="poolt">Poolt</button>
+                <button id="vastu" class="btn btn-vastu" data-otsus="vastu">Vastu</button>
+            </div>
+            <p id="minu-haal" class="muted">-</p>
+        </section>
+
+        <section class="card">
+            <h2>Tulemused</h2>
+            <div class="tulemus">
+                <div class="tulemus-osa">
+                    <span class="arv" id="poolt-arv">0</span>
+                    <span class="muted">poolt</span>
+                </div>
+                <div class="tulemus-osa">
+                    <span class="arv" id="vastu-arv">0</span>
+                    <span class="muted">vastu</span>
+                </div>
+                <div class="tulemus-osa">
+                    <span class="arv" id="haaletanud">0 / 0</span>
+                    <span class="muted">haaletanud</span>
+                </div>
+            </div>
+            <p class="muted" id="tulemus-markus"></p>
+        </section>
+
+        <section class="card">
+            <h2>Logi</h2>
+            <table class="logi">
+                <thead>
+                    <tr><th>Aeg</th><th>Tegevus</th><th>Haaletaja</th><th>Muutus</th></tr>
+                </thead>
+                <tbody id="logi"><tr><td colspan="4" class="muted">Laen...</td></tr></tbody>
+            </table>
         </section>
     </main>
     <script src="app.js"></script>

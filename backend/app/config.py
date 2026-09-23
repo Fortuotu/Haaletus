@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     db_user: str = "haaletus"
     db_password: str = "haaletus"
 
-    # Üks hääletus kestab 5 minutit
     vote_duration_seconds: int = 300
 
     cors_origins: str = "*"
