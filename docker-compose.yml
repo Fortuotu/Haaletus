@@ -60,6 +60,7 @@ services:
       - "${WEB_PORT}:80"
     depends_on:
       - api
+      - phpmyadmin
 
 volumes:
   db_data:
