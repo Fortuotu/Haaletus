@@ -11,7 +11,6 @@ router = APIRouter(prefix="/api/inimesed", tags=["inimesed"])
 
 @router.get("", response_model=list[InimeneOut])
 def loe_inimesed(db: Session = Depends(get_db)) -> list[Inimene]:
-    """Kõik eelnevalt andmebaasi kantud hääletajad."""
     return list(db.scalars(select(Inimene).order_by(Inimene.id)))
 
 

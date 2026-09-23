@@ -4,14 +4,14 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine
-from app.routers import inimesed
+from app.routers import haaletus, inimesed, logi, tulemused
 
 settings = get_settings()
 
 app = FastAPI(
-    title="Hääletussüsteem API",
-    description="I osa – hääletussüsteemi andmebaas ja API (boilerplate).",
-    version="0.1.0",
+    title="Haaletussusteem API",
+    description="I osa - haaletussusteemi andmebaas ja API.",
+    version="0.2.0",
 )
 
 app.add_middleware(
@@ -23,11 +23,13 @@ app.add_middleware(
 )
 
 app.include_router(inimesed.router)
+app.include_router(haaletus.router)
+app.include_router(tulemused.router)
+app.include_router(logi.router)
 
 
 @app.get("/api/health", tags=["service"])
 def health() -> dict[str, object]:
-    """Teenuse ja andmebaasiühenduse kontroll."""
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))

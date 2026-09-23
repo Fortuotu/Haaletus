@@ -1,17 +1,13 @@
-# Python
 backend/.venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Env
 .env
 !.env.example
 
-# Docker volumes
 db/data/
 
-# Editors / OS
 .vscode/
 .idea/
 .DS_Store
