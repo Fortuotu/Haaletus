@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.aeg import nyyd, nyyd_ms
+from app.aeg import nyyd
 from app.config import get_settings
-from app.models import Haaletus, Inimene, Logi, Tulemus
+from app.models import Haaletus, Inimene, Tulemus
 
 
 class HaaletusViga(Exception):
@@ -28,31 +28,6 @@ def on_aktiivne(tulemus: Tulemus, hetk: datetime | None = None) -> bool:
     return tulemus.h_alguse_aeg <= hetk < lopp_aeg(tulemus)
 
 
-def logi(
-    db: Session,
-    tegevus: str,
-    *,
-    tulemus: Tulemus | None = None,
-    inimene: Inimene | None = None,
-    vana_otsus: str | None = None,
-    uus_otsus: str | None = None,
-    markus: str | None = None,
-) -> None:
-    db.add(
-        Logi(
-            aeg=nyyd_ms(),
-            tulemus_id=tulemus.id if tulemus else None,
-            inimene_id=inimene.id if inimene else None,
-            eesnimi=inimene.eesnimi if inimene else None,
-            perenimi=inimene.perenimi if inimene else None,
-            tegevus=tegevus,
-            vana_otsus=vana_otsus,
-            uus_otsus=uus_otsus,
-            markus=markus,
-        )
-    )
-
-
 def viimane_voor(db: Session, *, lukusta: bool = False) -> Tulemus | None:
     paring = select(Tulemus).order_by(Tulemus.h_alguse_aeg.desc(), Tulemus.id.desc()).limit(1)
     if lukusta:
@@ -60,45 +35,14 @@ def viimane_voor(db: Session, *, lukusta: bool = False) -> Tulemus | None:
     return db.scalars(paring).first()
 
 
-def sulge_loppenud_voor(db: Session, tulemus: Tulemus | None) -> None:
-    if tulemus is None or on_aktiivne(tulemus):
-        return
-    juba_suletud = db.scalar(
-        select(func.count())
-        .select_from(Logi)
-        .where(Logi.tulemus_id == tulemus.id, Logi.tegevus == "HAALETUS_LOPPES")
-    )
-    if juba_suletud:
-        return
-    db.add(
-        Logi(
-            aeg=lopp_aeg(tulemus),
-            tulemus_id=tulemus.id,
-            tegevus="HAALETUS_LOPPES",
-            markus=(
-                f"Loplik tulemus: poolt {tulemus.poolt_haali}, "
-                f"vastu {tulemus.vastu_haali}, haaletanuid {tulemus.haaletanute_arv}"
-            ),
-        )
-    )
-    db.commit()
-
-
 def alusta_voor(db: Session) -> Tulemus:
     kaib = viimane_voor(db)
     if kaib is not None and on_aktiivne(kaib):
         raise HaaletusViga("Haaletus juba kaib")
-    sulge_loppenud_voor(db, kaib)
 
     tulemus = Tulemus(h_alguse_aeg=nyyd(), haaletanute_arv=0, poolt_haali=0, vastu_haali=0)
     db.add(tulemus)
     db.flush()
-    logi(
-        db,
-        "HAALETUS_ALGAS",
-        tulemus=tulemus,
-        markus=f"Kestus {get_settings().vote_duration_seconds} sekundit",
-    )
     db.commit()
     db.refresh(tulemus)
     return tulemus
@@ -127,16 +71,6 @@ def anna_haal(db: Session, inimene_id: int, otsus: str) -> Haaletus:
         raise HaaletusViga("Haaletust ei ole alustatud")
 
     if not on_aktiivne(tulemus):
-        logi(
-            db,
-            "HAAL_HILINES",
-            tulemus=tulemus,
-            inimene=inimene,
-            uus_otsus=otsus,
-            markus="Haaletus oli loppenud, otsust ei arvestatud",
-        )
-        sulge_loppenud_voor(db, tulemus)
-        db.commit()
         raise HaaletusViga("Haaletus on loppenud, otsust ei saa enam muuta", kood=403)
 
     tulemus = db.scalars(
@@ -161,30 +95,9 @@ def anna_haal(db: Session, inimene_id: int, otsus: str) -> Haaletus:
             otsus=otsus,
         )
         db.add(haal)
-        db.flush()
-        logi(db, "HAAL_ANTUD", tulemus=tulemus, inimene=inimene, uus_otsus=otsus)
-    elif haal.otsus == otsus:
-        logi(
-            db,
-            "HAAL_KORDUS",
-            tulemus=tulemus,
-            inimene=inimene,
-            vana_otsus=haal.otsus,
-            uus_otsus=otsus,
-            markus="Otsus jai samaks",
-        )
-    else:
-        vana = haal.otsus
+    elif haal.otsus != otsus:
         haal.otsus = otsus
         haal.haaletuse_aeg = nyyd()
-        logi(
-            db,
-            "HAAL_MUUDETUD",
-            tulemus=tulemus,
-            inimene=inimene,
-            vana_otsus=vana,
-            uus_otsus=otsus,
-        )
 
     _arvuta_tulemus(db, tulemus)
     db.commit()
@@ -219,7 +132,6 @@ def minu_haal(db: Session, inimene_id: int) -> dict[str, object]:
 
 def olek(db: Session) -> dict[str, object]:
     tulemus = viimane_voor(db)
-    sulge_loppenud_voor(db, tulemus)
     inimeste_arv = db.scalar(select(func.count()).select_from(Inimene)) or 0
 
     if tulemus is None:

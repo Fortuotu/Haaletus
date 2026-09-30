@@ -54,10 +54,9 @@ DB_HOST=127.0.0.1 uvicorn app.main:app --reload
   voor on uks rida tabelis `TULEMUSED`, mille `h_alguse_aeg` kehtib koigile haaletajatele.
 * Haaletaja saab olla `poolt` voi `vastu` ja voib vooru ajal otsust vabalt muuta;
   tabelis `HAALETUS` on tema kehtiv otsus (uks rida vooru ja inimese kohta).
-* Iga muutus kirjutatakse millisekundi tapsusega tabelisse `LOGI`:
-  `HAALETUS_ALGAS`, `HAAL_ANTUD`, `HAAL_MUUDETUD`, `HAAL_KORDUS`, `HAALETUS_LOPPES`, `HAAL_HILINES`.
+* Logi kirjutavad kaks andmebaasi triggerit tabelil `HAALETUS` (`db/init/03_triggers.sql`),
+  millisekundi tapsusega tabelisse `LOGI`: `HAAL_ANTUD` (uus haal) ja `HAAL_MUUDETUD` (otsus muutus).
 * Peale 5 minuti moodumist tagastab API haale andmisel `403` ja tulemused on loplikud.
-  Hilinenud katse ei muuda tulemust, aga jaab logisse kandena `HAAL_HILINES`.
 * Haaletaja naeb oma viimast otsust ka peale vooru loppu (`saab_muuta: false`).
 
 Vooru lopp tuletatakse ajast (`h_alguse_aeg + kestus`), mitte taustaprotsessist - seega ei soltu
