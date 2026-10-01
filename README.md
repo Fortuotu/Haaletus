@@ -1,4 +1,4 @@
-# Haaletussusteem - baasseadistus
+#  Haaletussusteem - baasseadistus
 
 I osa: andmebaas (MariaDB + phpMyAdmin), FastAPI backend ja staatiline frontend, koik Dockeris.
 Andmebaasi skeem on loodud, 11 haaletajat on seemendatud ja haaletamise loogika on teostatud.
